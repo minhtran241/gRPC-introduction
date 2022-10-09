@@ -39,20 +39,20 @@ To generate gRPC services for your application:
 
 The application contains:
 
--   The demo of 4 main types of RPCs
+### The demo of 4 main types of RPCs
 
     -   Unary RPCs
     -   Server Streaming RPCs
     -   Client Streaming RPCs
     -   Bi-Directional Streaming RPCs
 
--   gRPC Error Handling
+### gRPC Error Handling
 
     -   How gRPC deals with error can be found at [`grpc.io/docs/guides/error`](https://grpc.io/docs/guides/error/)
     -   Reference to implementation oof error codes can be found at [`avi.im/grpc-errors/#go`](https://avi.im/grpc-errors/#go)
     -   If an application needs to return extra information on top of an error code,it can use the metadata context
 
--   gRPC Deadlines
+### gRPC Deadlines
 
     -   Deadlines allow gRPC clients to specify how long they are willing to wait for an RPC to complete before the RPCis terminated with the error `DEADLINE_EXCEEDED`
     -   The gRPC documentation recommends you set a deadline for all client RPC calls
@@ -63,7 +63,7 @@ The application contains:
     -   Note: Deadlines are propagated across if gRPC calls are chained
     -   A => B => C (Deadline for A is passed to B and then passed to C)
 
--   SSL Encryption in gRPC
+### SSL Encryption in gRPC
 
     -   SSL encryption is done by generating SSL certificates
     -   SSL allows communication to be secure end-to-end and ensuring no `Man in the middle attack` can be performed
@@ -82,7 +82,7 @@ The application contains:
     -   All the configuration for generating SSL certificates is specified in file `ssl/ssl.cnf`
     -   Using `SHA256` algorithm for authentication
 
--   gRPC Reflection & CLI
+### gRPC Reflection & CLI
 
     -   Why gRPC Reflection?
         -   As we've seen, for Clients to connect to our Server, they need to have a `.proto` file which defines the service
@@ -109,7 +109,7 @@ The application contains:
 
     -   More information about gRPC Reflection can be found at [`pkg.go.dev/google.golang.org/grpc/reflection`](https://pkg.go.dev/google.golang.org/grpc/reflection#section-readme)
 
--   How to run the project
+### How to run the project
 
     -   The project contains services
         -   Greeting Service
