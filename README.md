@@ -27,9 +27,13 @@ Follow the module ([`github.com/grpc/grpc-go`](https://github.com/grpc/grpc-go))
 To generate gRPC services for your application:
 
 -   Update your PATH so that the protoc compiler can find the plugins
-    -   `PATH="${PATH}:${HOME}/go/bin"`
+    ```sh
+    PATH="${PATH}:${HOME}/go/bin"
+    ```
 -   Generate services:
-    -   `protoc --go-grpc_out=require_unimplemented_servers=false:. ./yourpath/to.protofile/*.proto`
+    ```sh
+    protoc --go-grpc_out=require_unimplemented_servers=false:. ./yourpath/to.protofile/*.proto
+    ```
 
 ## Demo Application applied gRPC with Go
 
@@ -72,7 +76,7 @@ The application contains:
         -   2-way verification, e.g. SSL authentication
     -   Detailed Setup of SSL for Encryption
 
-    <img src="./assets/how_ssl_works.png" width=400 height=240>
+    <img src="./assets/how_ssl_works.png" width=800 height=450>
 
     -   All steps and command lines are noted in file `ssl/instructions.sh`
     -   All the configuration for generating SSL certificates is specified in file `ssl/ssl.cnf`
@@ -111,9 +115,13 @@ The application contains:
         -   Greeting Service
         -   Calculator Service
     -   Start the server of one service
-        -   `go run service/service_server/server.go`
+        ```sh
+        go run service/service_server/server.go
+        ```
     -   Start the client of one service
-        -   `go run service/service_client/client.go`
+        ```sh
+        go run service/service_client/client.go
+        ```
 
 ## Contributor
 
