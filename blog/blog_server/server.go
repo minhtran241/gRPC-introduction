@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -62,6 +63,36 @@ func (*server) CreateBlog(ctx context.Context, in *blogpb.CreateBlogRequest) (*b
 			AuthorId: blog.GetAuthorId(),
 			Title:    blog.GetTitle(),
 			Content:  blog.GetContent(),
+		},
+	}, nil
+}
+
+func (*server) ReadBlog(ctx context.Context, in *blogpb.ReadBlogRequest) (*blogpb.ReadBlogResponse, error) {
+	fmt.Println("Read blog request")
+	blogID := in.GetBlogId()
+	oid, err := primitive.ObjectIDFromHex(blogID)
+	if err != nil {
+		return nil, status.Errorf(
+			codes.InvalidArgument,
+			fmt.Sprintf("Can not parse ID"),
+		)
+	}
+	// create an empty struct
+	data := &blogItem{}
+	filter := bson.D{{"_id", oid}}
+	err = collection.FindOne(context.Background(), filter).Decode(data)
+	if err == mongo.ErrNoDocuments {
+		// Do something when no record was found
+		return nil, status.Errorf(codes.NotFound, fmt.Sprintf("Can not find blog with specified ID: %v\n", err))
+	} else if err != nil {
+		return nil, status.Errorf(codes.Internal, fmt.Sprintf("Something went wrong: %v\n", err))
+	}
+	return &blogpb.ReadBlogResponse{
+		Blog: &blogpb.Blog{
+			Id:       data.ID.Hex(),
+			AuthorId: data.AuthorID,
+			Title:    data.Title,
+			Content:  data.Content,
 		},
 	}, nil
 }
