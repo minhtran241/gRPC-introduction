@@ -83,7 +83,7 @@ func (*server) ReadBlog(ctx context.Context, in *blogpb.ReadBlogRequest) (*blogp
 	if err != nil {
 		return nil, status.Errorf(
 			codes.InvalidArgument,
-			fmt.Sprintf("Can not parse ID"),
+			fmt.Sprintln("Can not parse ID"),
 		)
 	}
 	// create an empty struct
@@ -108,7 +108,7 @@ func (*server) UpdateBlog(ctx context.Context, in *blogpb.UpdateBlogRequest) (*b
 	if err != nil {
 		return nil, status.Errorf(
 			codes.InvalidArgument,
-			fmt.Sprintf("Can not parse ID"),
+			fmt.Sprintln("Can not parse ID"),
 		)
 	}
 	data := &blogItem{}
@@ -131,6 +131,29 @@ func (*server) UpdateBlog(ctx context.Context, in *blogpb.UpdateBlogRequest) (*b
 	}
 	return &blogpb.UpdateBlogResponse{
 		Blog: dataToBlogPb(data),
+	}, nil
+}
+
+func (*server) DeleteBlog(ctx context.Context, in *blogpb.DeleteBlogRequest) (*blogpb.DeleteBlogResponse, error) {
+	fmt.Println("Delete blog request")
+	blogID := in.GetBlogId()
+	oid, err := primitive.ObjectIDFromHex(blogID)
+	if err != nil {
+		return nil, status.Errorf(
+			codes.InvalidArgument,
+			fmt.Sprintln("Can not parse ID"),
+		)
+	}
+	filter := bson.D{{"_id", oid}}
+	deleteRes, deleteErr := collection.DeleteOne(context.Background(), filter)
+	if deleteRes.DeletedCount == 0 {
+		// Do something when no record was found
+		return nil, status.Errorf(codes.NotFound, fmt.Sprintf("Can not find blog with specified ID: %v\n", deleteErr))
+	} else if deleteErr != nil {
+		return nil, status.Errorf(codes.Internal, fmt.Sprintf("Something went wrong: %v\n", deleteErr))
+	}
+	return &blogpb.DeleteBlogResponse{
+		BlogId: blogID,
 	}, nil
 }
 
