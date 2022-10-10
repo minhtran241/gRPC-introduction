@@ -67,6 +67,15 @@ func (*server) CreateBlog(ctx context.Context, in *blogpb.CreateBlogRequest) (*b
 	}, nil
 }
 
+func dataToBlogPb(data *blogItem) *blogpb.Blog {
+	return &blogpb.Blog{
+		Id:       data.ID.Hex(),
+		AuthorId: data.AuthorID,
+		Title:    data.Title,
+		Content:  data.Content,
+	}
+}
+
 func (*server) ReadBlog(ctx context.Context, in *blogpb.ReadBlogRequest) (*blogpb.ReadBlogResponse, error) {
 	fmt.Println("Read blog request")
 	blogID := in.GetBlogId()
@@ -88,12 +97,40 @@ func (*server) ReadBlog(ctx context.Context, in *blogpb.ReadBlogRequest) (*blogp
 		return nil, status.Errorf(codes.Internal, fmt.Sprintf("Something went wrong: %v\n", err))
 	}
 	return &blogpb.ReadBlogResponse{
-		Blog: &blogpb.Blog{
-			Id:       data.ID.Hex(),
-			AuthorId: data.AuthorID,
-			Title:    data.Title,
-			Content:  data.Content,
-		},
+		Blog: dataToBlogPb(data),
+	}, nil
+}
+
+func (*server) UpdateBlog(ctx context.Context, in *blogpb.UpdateBlogRequest) (*blogpb.UpdateBlogResponse, error) {
+	fmt.Println("Update blog request")
+	blog := in.GetBlog()
+	oid, err := primitive.ObjectIDFromHex(blog.GetId())
+	if err != nil {
+		return nil, status.Errorf(
+			codes.InvalidArgument,
+			fmt.Sprintf("Can not parse ID"),
+		)
+	}
+	data := &blogItem{}
+	filter := bson.D{{"_id", oid}}
+	err = collection.FindOne(context.Background(), filter).Decode(data)
+	if err == mongo.ErrNoDocuments {
+		// Do something when no record was found
+		return nil, status.Errorf(codes.NotFound, fmt.Sprintf("Can not find blog with specified ID: %v\n", err))
+	} else if err != nil {
+		return nil, status.Errorf(codes.Internal, fmt.Sprintf("Something went wrong: %v\n", err))
+	}
+	// we update our internal struct
+	data.AuthorID = blog.GetAuthorId()
+	data.Content = blog.GetContent()
+	data.Title = blog.GetTitle()
+
+	_, updateErr := collection.ReplaceOne(context.Background(), filter, data)
+	if updateErr != nil {
+		return nil, status.Errorf(codes.Internal, fmt.Sprintf("Can not update object in MongoDB: %v\n", updateErr))
+	}
+	return &blogpb.UpdateBlogResponse{
+		Blog: dataToBlogPb(data),
 	}, nil
 }
 
@@ -124,7 +161,7 @@ func main() {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
-	tls := false // use tls for security or not
+	tls := true // use tls for security or not
 	opts := []grpc.ServerOption{}
 
 	if tls {

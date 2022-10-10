@@ -14,7 +14,7 @@ import (
 func main() {
 	fmt.Println("Client is running...")
 
-	tls := false // use tls for security or not
+	tls := true // use tls for security or not
 	opts := grpc.WithInsecure()
 
 	if tls {
@@ -68,4 +68,19 @@ func main() {
 		fmt.Printf("Error happened while reading: %v\n", readBlogErr)
 	}
 	fmt.Printf("Blog was read: %v\n", readBlogRes)
+
+	// update Blog
+	newBlog := &blogpb.Blog{
+		Id:       blogId,
+		AuthorId: "Changed Author",
+		Title:    "Big Data (edited)",
+		Content:  "An introduction to Big Data (edited)",
+	}
+	updateRes, updateErr := c.UpdateBlog(context.Background(), &blogpb.UpdateBlogRequest{
+		Blog: newBlog,
+	})
+	if updateErr != nil {
+		fmt.Printf("Error happened while updating: %v\n", updateErr)
+	}
+	fmt.Printf("Blog was updated: %v\n", updateRes)
 }
