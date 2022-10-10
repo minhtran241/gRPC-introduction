@@ -7,3 +7,7 @@ protoc --go-grpc_out=require_unimplemented_servers=false:. ./greet/greetpb/greet
 protoc --go_out=. ./calculator/calculatorpb/calculator.proto 
 PATH="${PATH}:${HOME}/go/bin"
 protoc --go-grpc_out=require_unimplemented_servers=false:. ./calculator/calculatorpb/calculator.proto
+
+protoc --go_out=. ./blog/blogpb/blog.proto 
+PATH="${PATH}:${HOME}/go/bin"
+protoc --go-grpc_out=require_unimplemented_servers=false:. ./blog/blogpb/blog.proto
