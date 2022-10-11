@@ -45,6 +45,7 @@ The application contains:
     -   Server Streaming RPCs
     -   Client Streaming RPCs
     -   Bi-Directional Streaming RPCs
+    -   Blog Service with MongoDB
 
 -   gRPC Error Handling
 
@@ -92,7 +93,7 @@ The application contains:
     -   Reflection helps us
         -   Having servers "expose" which endpoints are available
         -   Allowing CLI to talk to our server without have a preliminary `.proto` file
-    -   This project uses the [evans](`https://github.com/ktr0731/evans`) CLI to practice on the client side
+    -   This project uses the [evans](`https://github.com/ktr0731/evans`) REPL to practice on the client side
     -   To register server reflection on a gRPC server:
 
         ```sh
@@ -109,11 +110,57 @@ The application contains:
 
     -   More information about gRPC Reflection can be found at [`pkg.go.dev/google.golang.org/grpc/reflection`](https://pkg.go.dev/google.golang.org/grpc/reflection#section-readme)
 
--   How to run the project
+## Blog Service with MongoDB
 
-    -   The project contains services
-        -   Greeting Service
-        -   Calculator Service
+-   The Blog Service contains 5 RPCs (4 Unary RPCs and 1 Server Streaming RPC)
+-   CRUD services
+-   Database
+
+    -   Find more information about MongoDB Driver for Go at [`github.com/mongodb/mongo-go-driver`](https://github.com/mongodb/mongo-go-driver)
+    -   Installation
+        ```sh
+        go get go.mongodb.org/mongo-driver/mongo
+        ```
+    -   Usage
+
+        -   To get started with the driver, import the `mongo` package and create a `mongo.Client` with the `Connect` function:
+
+            ```sh
+            import (
+                "context"
+                "time"
+
+                "go.mongodb.org/mongo-driver/mongo"
+                "go.mongodb.org/mongo-driver/mongo/options"
+                "go.mongodb.org/mongo-driver/mongo/readpref"
+            )
+
+            ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+            defer cancel()
+            client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+            ```
+
+        -   MongoDB runs on `localhost:27017`
+        -   Make sure to defer a call to `Disconnect` after instantiating your client:
+            ```sh
+            defer func() {
+                if err = client.Disconnect(ctx); err != nil {
+                    panic(err)
+                }
+            }()
+            ```
+        -   To insert a document into a collection, first retrieve a `Database` and then `Collection` instance from the `Client`:
+            ```sh
+            collection := client.Database("mydb").Collection("blogs")
+            ```
+
+## Project Usage
+
+-   The project contains services
+    -   Greeting Service
+    -   Calculator Service
+    -   Blog Service
+-   Start Demo (run all the services respectively)
     -   Start the server of one service
         ```sh
         go run service/service_server/server.go
@@ -122,6 +169,22 @@ The application contains:
         ```sh
         go run service/service_client/client.go
         ```
+-   Play with the services by using [`ktr0731/evans`](https://github.com/ktr0731/evans) REPL mode
+
+    -   Installation
+        -   MacOS
+            ```sh
+            brew tap ktr0731/evans
+            brew install evans
+            ```
+    -   Usage
+        -   Go to the one of the services you want to play with and run `evans` in REPL mode
+            ```sh
+            evans --proto service/service_pb/service.proto repl
+            ```
+        -   Follow the instructions of [`ktr0731/evans`](https://github.com/ktr0731/evans)
+
+    <img src="./assets/evans_instruction.png">
 
 ## Contributor
 
